@@ -2,37 +2,46 @@
 
 namespace Lis
 {
-    public class ConvertNumberToWords
+
+    public static class OnesTensConstants
     {
 
-
-        #region Ones Constants
-        private static readonly string[] One = {"", "one ", "two ", "three ", "four ",
+        public static string[] One = {"", "one ", "two ", "three ", "four ",
             "five ", "six ", "seven ", "eight ",
             "nine ", "ten ", "eleven ", "twelve ",
             "thirteen ", "fourteen ", "fifteen ",
             "sixteen ", "seventeen ", "eighteen ",
             "nineteen "};
-        #endregion
 
-        #region Tens Constants
-        private static readonly string[] Ten = {"", "", "twenty ", "thirty ", "forty ",
+
+        public static string[] Ten = {"", "", "twenty ", "thirty ", "forty ",
             "fifty ", "sixty ", "seventy ", "eighty ",
             "ninety "};
-        #endregion
 
-        #region Convert number upto 2 digits
-        static string NumToWords(int number, string wordAfterNumber)
+    }
+    public interface ITwoDigit
+    {
+        public string NumToWords(int number, string wordAfterNumber);
+    }
+
+    public interface INumberConverter
+    {
+        public string ConvertToWords(long number);
+    }
+
+    public class TwoDigit:ITwoDigit
+    {
+        string ITwoDigit.NumToWords(int number, string wordAfterNumber)
         {
             string str = "";
 
             if (number > 19)
             {
-                str += Ten[number / 10] + One[number % 10];
+                str += OnesTensConstants.Ten[number / 10] + OnesTensConstants.One[number % 10];
             }
             else
             {
-                str += One[number];
+                str += OnesTensConstants.One[number];
             }
 
             if (number != 0)
@@ -42,45 +51,42 @@ namespace Lis
 
             return str;
         }
-        #endregion
+    }
+    public class ConvertNumberToWords : INumberConverter
+    {
+        ITwoDigit _twoDigit = new TwoDigit();
 
-        #region Convert Number more that 2 digits
-        static string ConvertToWords(long n)
+        string INumberConverter.ConvertToWords(long n)
         {
 
             string out1 = "";
 
-            out1 += NumToWords((int)(n / 10000000),
-                "crore ");
+            out1 += _twoDigit.NumToWords((int)(n / 10000000), "crore ");
 
-            out1 += NumToWords((int)((n / 100000) % 100),
-                "lakh ");
+            out1 += _twoDigit.NumToWords((int)((n / 100000) % 100), "lakh ");
 
-            out1 += NumToWords((int)((n / 1000) % 100),
-                "thousand ");
+            out1 += _twoDigit.NumToWords((int)((n / 1000) % 100), "thousand ");
 
-            out1 += NumToWords((int)((n / 100) % 10),
-                "hundred ");
+            out1 += _twoDigit.NumToWords((int)((n / 100) % 10), "hundred ");
 
             if (n > 100 && n % 100 > 0)
             {
                 out1 += "and ";
             }
 
-            out1 += NumToWords((int)(n % 100), "");
+            out1 += _twoDigit.NumToWords((int)(n % 100), "");
 
             return out1;
         }
-        #endregion
 
-        #region Main
         public static void Main()
         {
             try
             {
+                INumberConverter numberConverter = new ConvertNumberToWords();
                 Console.WriteLine("Enter a number to convert it into words...");
                 Int64 input = Convert.ToInt64(Console.ReadLine());
-                Console.WriteLine(ConvertToWords(input));
+                Console.WriteLine(numberConverter.ConvertToWords(input));
             }
             catch (Exception ex)
             {
@@ -90,9 +96,6 @@ namespace Lis
                 }
             }
         }
-        #endregion
-
-
     }
 }
 
